@@ -1,4 +1,4 @@
-version: 1.0
+version: 1
 jobs:
   hello:
     steps:
@@ -13,5 +13,4 @@ stages:
   - name: build
     jobs:
       - - hello
-        - world
       - hello-world
