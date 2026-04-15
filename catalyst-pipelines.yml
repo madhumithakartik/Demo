@@ -1,16 +1,11 @@
 version: 1
 jobs:
-  hello:
+  deploy:
     steps:
-      - echo "Hello"
-  world:
-    steps:
-      - echo "World"
-  hello-world:
-    steps:
-      - echo "Hello World!"
+      - cd Demo
+      - npm install
+      - catalyst deploy
 stages:
   - name: build
     jobs:
-      - - hello
-      - hello-world
+      - deploy
