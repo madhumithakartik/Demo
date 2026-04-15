@@ -1,12 +1,19 @@
-version: 1.0
+version: 1
 
-stages:
-  - name: deploy
-    image: node:20
-    jobs:
-      - name: deploy-appsail
-        steps:
-          - cd /catalyst
-          - npm install
-          - npm install -g zcatalyst-cli
-          - catalyst deploy appsail --name incident-api --verbose
+jobs:
+  build_and_deploy_appsail:
+    steps:
+      # Step 1: Install all dependencies (Express, Kendo UI, etc.)
+      - name: Install Dependencies
+        command: npm install
+      
+      # Step 2: Build your frontend assets (if applicable)
+      # If your Kendo UI setup requires Webpack, Vite, or another bundler, this command 
+      # creates your static 'dist' or 'build' folder for Express to serve.
+      # If you are using plain HTML/JS without a build step, you can safely remove this step.
+      - name: Build Kendo UI Frontend
+        command: npm run build --if-present
+      
+      # Step 3: Deploy to Zoho Catalyst AppSail
+      - name: Deploy Express App to AppSail
+        command: catalyst deploy appsail --token << env.CATALYST_TOKEN >> --project << env.PROJECT_ID >> --org << env.CATALYST_ORG >>
