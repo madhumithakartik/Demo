@@ -1,17 +1,35 @@
 version: 1.0
+
+runners:
+  default:
+    config-id: 3
+
+pipeline-when:
+  equal:
+    - << event.ref >>
+    - refs/heads/main
+
+images:
+  node:
+    image: node:20
+
 jobs:
-  hello:
+  deploy-appsail:
     steps:
-      - echo "Hello"
-  world:
-    steps:
-      - echo "World"
-  hello-world:
-    steps:
-      - echo "Hello World!"
+      - cd /catalyst
+      - npm ci
+      - npm install -g zcatalyst-cli
+      - >-
+        catalyst deploy appsail
+        --name "incident-api"
+        --build-path "/catalyst"
+        --stack node20
+        --platform nodejs
+        --command "node index.js"
+        --verbose
+
 stages:
-  - name: build
+  - name: deploy
+    image: node
     jobs:
-      - - hello
-        - world
-      - hello-world
+      - deploy-appsail
