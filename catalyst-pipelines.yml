@@ -1,9 +1,12 @@
 version: 1.0
 
 stages:
-  - name: test
+  - name: deploy
     image: node:20
     jobs:
-      - name: echo-job
+      - name: deploy-appsail
         steps:
-          - echo "Pipeline working"
+          - cd /catalyst
+          - npm install
+          - npm install -g zcatalyst-cli
+          - catalyst deploy appsail --name incident-api --verbose
