@@ -5,6 +5,7 @@ jobs:
       - pwd
       - ls -la
       - npm install
+      - npm install -g zcatalyst-cli
       - catalyst deploy
 stages:
   - name: build
