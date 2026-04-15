@@ -2,7 +2,8 @@ version: 1
 jobs:
   deploy:
     steps:
-      - cd Demo
+      - pwd
+      - ls -la
       - npm install
       - catalyst deploy
 stages:
