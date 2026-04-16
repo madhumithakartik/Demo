@@ -6,7 +6,6 @@ jobs:
       - ls -la
       - test -f catalyst.json || (echo "catalyst.json not found in current directory" && exit 1)
       - npm ci
-      - npm run build
       - ls -la
       - npm install -g zcatalyst-cli@latest
       - catalyst deploy
