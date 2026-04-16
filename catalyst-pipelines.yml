@@ -8,7 +8,7 @@ jobs:
       - npm ci
       - ls -la
       - npm install -g zcatalyst-cli@latest
-      - catalyst deploy
+      - catalyst deploy --token $CATALYST_TOKEN
 stages:
   - name: build
     jobs:
