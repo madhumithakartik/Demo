@@ -4,8 +4,11 @@ jobs:
     steps:
       - pwd
       - ls -la
-      - npm install
-      - npm install -g zcatalyst-cli
+      - test -f catalyst.json || (echo "catalyst.json not found in current directory" && exit 1)
+      - npm ci
+      - npm run build
+      - ls -la
+      - npm install -g zcatalyst-cli@latest
       - catalyst deploy
 stages:
   - name: build
