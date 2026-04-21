@@ -8,14 +8,186 @@
   <script src="https://kendo.cdn.telerik.com/2022.2.802/js/kendo.all.min.js"></script>
   <link rel="stylesheet"
         href="https://kendo.cdn.telerik.com/2022.2.802/styles/kendo.default-ocean-blue.min.css">
+
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 20px;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .k-grid {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      background: #fff;
+    }
+
+    .k-grid-header {
+      background: #eff6ff;
+      font-weight: 700;
+    }
+
+    .k-grid td,
+    .k-grid th {
+      font-size: 14px;
+    }
+
+    .radio-cell {
+      text-align: center;
+    }
+
+    .k-window {
+      border-radius: 12px !important;
+      overflow: hidden;
+    }
+
+    .k-window-titlebar {
+      background: #2563eb;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .popup-form {
+      padding: 10px 4px 4px;
+    }
+
+    .form-row {
+      margin-bottom: 14px;
+    }
+
+    .form-row label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .form-row input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    .form-row input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-actions {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .form-actions button {
+      margin-left: 8px;
+    }
+	
+	
+  </style>
 </head>
 <body>
   <h2>Employee Master</h2>
   <div id="grid"></div>
 
+  <!-- Add Employee Popup -->
+  <div id="employeeWindow" style="display:none;">
+    <form id="employeeForm" class="popup-form">
+      <div class="form-row">
+        <label for="addName">Employee Name</label>
+        <input id="addName" type="text" placeholder="Enter employee name" required />
+      </div>
+
+      <div class="form-row">
+        <label for="addEmail">Email</label>
+        <input id="addEmail" type="email" placeholder="Enter email address" required />
+      </div>
+
+      <div class="form-row">
+        <label for="addDepartment">Department</label>
+        <input id="addDepartment" type="text" placeholder="Enter department" />
+      </div>
+
+      <div class="form-row">
+        <label for="addDesignation">Designation</label>
+        <input id="addDesignation" type="text" placeholder="Enter designation" />
+      </div>
+
+      <div class="form-row">
+        <label for="addSalary">Salary</label>
+        <input id="addSalary" type="number" min="0" placeholder="Enter salary" />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="cancelEmployee" class="btn-secondary">Cancel</button>
+        <button type="button" id="saveEmployee" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+
   <script>
     $(document).ready(function () {
       const baseUrl = "/api/employees";
+      let selectedRowItem = null;
 
       const employeeDataSource = new kendo.data.DataSource({
         transport: {
@@ -23,12 +195,6 @@
             url: baseUrl,
             type: "GET",
             dataType: "json"
-          },
-          create: {
-            url: baseUrl,
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json"
           },
           update: {
             url: function (data) {
@@ -46,7 +212,7 @@
             dataType: "json"
           },
           parameterMap: function (data, type) {
-            if (type === "create" || type === "update") {
+            if (type === "update") {
               return kendo.stringify({
                 Name: data.Name,
                 Email: data.Email,
@@ -58,14 +224,13 @@
             return data;
           }
         },
-
         schema: {
           data: "data",
           model: {
             id: "ROWID",
             fields: {
               ROWID: { editable: false, nullable: true },
-			  EmpNo: { editable: false },
+              EmpNo: { editable: false },
               Name: { type: "string", validation: { required: true } },
               Email: { type: "string", validation: { required: true } },
               Department: { type: "string" },
@@ -74,9 +239,7 @@
             }
           }
         },
-
         pageSize: 10,
-
         error: function (e) {
           console.log("Kendo error:", e);
           const msg =
@@ -87,23 +250,143 @@
         }
       });
 
-      $("#grid").kendoGrid({
+      const grid = $("#grid").kendoGrid({
         dataSource: employeeDataSource,
         pageable: true,
         sortable: true,
         filterable: true,
-        toolbar: ["create"],
+        selectable: "row",
+        toolbar: `
+          <div class="toolbar-actions">
+            <button type="button" id="btnAddEmployee" class="btn-primary">+ Add Employee</button>
+            <button type="button" id="btnEditEmployee" class="btn-secondary" style="display:none;">Edit</button>
+            <button type="button" id="btnDeleteEmployee" class="btn-danger" style="display:none;">Delete</button>
+          </div>
+        `,
         editable: "popup",
+        edit: function (e) {
+          if (e.model.isNew()) {
+            e.container.find(".k-grid-update").text("Create");
+          } else {
+            e.container.find(".k-grid-update").text("Update");
+          }
+        },
+        dataBound: function () {
+          selectedRowItem = null;
+          $("#btnEditEmployee").hide();
+          $("#btnDeleteEmployee").hide();
+          $("#grid tbody .row-selector").prop("checked", false);
+        },
         columns: [
-		  { field: "EmpNo", title: "Employee No", editable: false },
+          {
+            title: "",
+            width: "60px",
+            sortable: false,
+            filterable: false,
+            attributes: { class: "radio-cell" },
+            template: '<input type="radio" name="employeeSelector" class="row-selector" />'
+          },
+          { field: "EmpNo", title: "Employee No", width: "140px" },
           { field: "Name", title: "Employee Name" },
           { field: "Email", title: "Email" },
           { field: "Department", title: "Department" },
           { field: "Designation", title: "Designation" },
-          { field: "Salary", title: "Salary", format: "{0:n0}" },
-          { command: ["edit", "destroy"], title: "Actions", width: "220px" }
+          { field: "Salary", title: "Salary", format: "{0:n0}" }
         ]
+      }).data("kendoGrid");
+
+      const employeeWindow = $("#employeeWindow").kendoWindow({
+        title: "Add Employee",
+        width: "500px",
+        modal: true,
+        visible: false,
+        resizable: false
+      }).data("kendoWindow");
+
+      $("#grid").on("change", ".row-selector", function () {
+        const tr = $(this).closest("tr");
+
+        $("#grid tbody .row-selector").not(this).prop("checked", false);
+
+        grid.clearSelection();
+        grid.select(tr);
+
+        selectedRowItem = grid.dataItem(tr);
+
+        $("#btnEditEmployee").show();
+        $("#btnDeleteEmployee").show();
       });
+
+      $(document).on("click", "#btnAddEmployee", function () {
+        $("#employeeForm")[0].reset();
+        employeeWindow.title("Add Employee");
+        employeeWindow.center().open();
+      });
+
+      $("#saveEmployee").on("click", function () {
+        const payload = {
+          Name: $("#addName").val().trim(),
+          Email: $("#addEmail").val().trim(),
+          Department: $("#addDepartment").val().trim(),
+          Designation: $("#addDesignation").val().trim(),
+          Salary: $("#addSalary").val() ? Number($("#addSalary").val()) : null
+        };
+
+        if (!payload.Name || !payload.Email) {
+          alert("Name and Email are required");
+          return;
+        }
+
+        $.ajax({
+          url: baseUrl,
+          type: "POST",
+          contentType: "application/json",
+          dataType: "json",
+          data: JSON.stringify(payload),
+          success: function () {
+            employeeWindow.close();
+            employeeDataSource.read();
+          },
+          error: function (xhr) {
+            const msg =
+              xhr.responseJSON && xhr.responseJSON.message
+                ? xhr.responseJSON.message
+                : "Something went wrong";
+            alert(msg);
+          }
+        });
+      });
+
+      $("#cancelEmployee").on("click", function () {
+        employeeWindow.close();
+      });
+
+      $(document).on("click", "#btnEditEmployee", function () {
+        if (!selectedRowItem) {
+          alert("Please select a row.");
+          return;
+        }
+
+        const tr = $("#grid tbody tr[data-uid='" + selectedRowItem.uid + "']");
+        grid.editRow(tr);
+      });
+
+      $(document).on("click", "#btnDeleteEmployee", function () {
+        if (!selectedRowItem) {
+          alert("Please select a row.");
+          return;
+        }
+
+        if (confirm("Are you sure you want to delete this employee?")) {
+          employeeDataSource.remove(selectedRowItem);
+          employeeDataSource.sync();
+          selectedRowItem = null;
+          $("#btnEditEmployee").hide();
+          $("#btnDeleteEmployee").hide();
+        }
+      });
+
+      employeeDataSource.read();
     });
   </script>
 </body>
