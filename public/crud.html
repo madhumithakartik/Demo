@@ -102,10 +102,6 @@
       font-weight: 700;
     }
 
-    .popup-form {
-      padding: 10px 4px 4px;
-    }
-
     .form-row {
       margin-bottom: 14px;
     }
@@ -142,6 +138,39 @@
       margin-left: 8px;
     }
 	
+	.popup-form {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px 20px;
+	padding: 10px;
+	}
+
+	.form-row {
+	margin-bottom: 0;
+	}
+
+	.form-actions {
+	grid-column: span 3; /* Full width for buttons */
+	text-align: right;
+	margin-top: 10px;
+	}
+	
+	.form-row select {
+	width: 100%;
+	padding: 10px 12px;
+	border-radius: 8px;
+	border: 1px solid #d1d5db;
+	font-size: 14px;
+	box-sizing: border-box;
+	background: #fff;
+	}
+
+	.form-row select:focus {
+	outline: none;
+	border-color: #2563eb;
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+	}
+	
 	
   </style>
 </head>
@@ -161,20 +190,74 @@
         <label for="addEmail">Email</label>
         <input id="addEmail" type="email" placeholder="Enter email address" required />
       </div>
-
-      <div class="form-row">
-        <label for="addDepartment">Department</label>
-        <input id="addDepartment" type="text" placeholder="Enter department" />
+	  
+	  <div class="form-row">
+        <label for="addMobNum">Mobile number</label>
+        <input id="addMobNum" type="number" min="0" placeholder="Enter mobile number" />
+      </div>
+	  
+	  <div class="form-row">
+        <label for="addAltMobNum">Alternate mobile number</label>
+        <input id="addAltMobNum" type="number" min="0" placeholder="Enter alternate mobile number" />
+      </div>
+	  
+	  <div class="form-row">
+		<label for="addGender">Gender</label>
+		<select id="addGender">
+		<option value="">Select Gender</option>
+		<option value="Male">Male</option>
+		<option value="Female">Female</option>
+		<option value="Other">Other</option>
+		</select>
       </div>
 
       <div class="form-row">
-        <label for="addDesignation">Designation</label>
-        <input id="addDesignation" type="text" placeholder="Enter designation" />
+        <label for="addMaritalStatus">Marital Status</label>
+		<select id="addMaritalStatus">
+		<option value="">Select </option>
+		<option value="Married">Married</option>
+		<option value="Single">Single</option>
+		</select>
       </div>
 
       <div class="form-row">
-        <label for="addSalary">Salary</label>
-        <input id="addSalary" type="number" min="0" placeholder="Enter salary" />
+        <label for="addNatiaonlity">Nationality</label>
+		<select id="addNatiaonlity">
+		<option value="">Select </option>
+		<option value="Indian">Indian</option>
+		<option value="Other">Other</option>
+		</select>
+      </div>
+	  
+	  <div class="form-row">
+        <label for="addDOB">Date of Birth</label>
+        <input id="addDOB" />
+      </div>
+	  
+	  <div class="form-row">
+        <label for="addBloodGroup">Blood Group</label>
+        <input id="addBloodGroup" type="text" min="0" placeholder="Enter Blood Group" />
+      </div>
+	  
+	  <div class="form-row">
+        <label for="addEmerContactName">Emergency Contact Name</label>
+        <input id="addEmerContactName" type="text" min="0" placeholder="Enter Emergency Contact Name" />
+      </div>
+	  
+	  <div class="form-row">
+        <label for="addEmerContactNum">Emergency Contact Number</label>
+        <input id="addEmerContactNum" type="number" min="0" placeholder="Enter Emergency Contact Number" />
+      </div>
+	  
+	  <div class="form-row">
+        <label for="addReln">Relationship</label>
+		<select id="addReln">
+		<option value="">Select Gender</option>
+		<option value="Male">Father</option>
+		<option value="Female">Mother</option>
+		<option value="Husband">Husband</option>
+		<option value="Other">Other</option>
+		</select>
       </div>
 
       <div class="form-actions">
@@ -297,7 +380,7 @@
 
       const employeeWindow = $("#employeeWindow").kendoWindow({
         title: "Add Employee",
-        width: "500px",
+        width: "800px",
         modal: true,
         visible: false,
         resizable: false
@@ -322,6 +405,13 @@
         employeeWindow.title("Add Employee");
         employeeWindow.center().open();
       });
+	  
+		$("#addDOB").kendoDatePicker({
+		format: "dd-MM-yyyy",
+		max: new Date(),          // Prevent future dates
+		start: "decade",          // Opens in year selection view
+		depth: "month"            // User selects date finally
+		});
 
       $("#saveEmployee").on("click", function () {
         const payload = {
