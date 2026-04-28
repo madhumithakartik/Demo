@@ -6,19 +6,15 @@ const catalyst = require('zcatalyst-sdk-node');
 
 const app = express();
 
-// AppSail port
 const PORT = process.env.X_ZOHO_CATALYST_LISTEN_PORT || process.env.PORT || 9000;
 
-// Change this to your actual Data Store table name
 const EMPLOYEE_TABLE = 'Employee';
+const COUNTER_TABLE = 'Counters';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Optional: serve static files like crud.html from /public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Health check
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -26,49 +22,64 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Optional root route
 app.get('/', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'crud.html');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.status(200).send('Employee API is running. Open /health or call /api/employees');
-    }
-  });
+  res.sendFile(path.join(__dirname, 'public', 'crud.html'));
 });
 
-/**
- * Small helper to get Catalyst table instance for current request
- */
-function getEmployeeTable(req) {
-  const catalystApp = catalyst.initialize(req);
-  const datastore = catalystApp.datastore();
-  return datastore.table(EMPLOYEE_TABLE);
+function getCatalystApp(req) {
+  return catalyst.initialize(req);
 }
 
-/**
- * GET /api/employees
- * Returns all employees using paged fetch
- */
+function getEmployeeTable(req) {
+  return getCatalystApp(req).datastore().table(EMPLOYEE_TABLE);
+}
+
+function cleanText(value) {
+  return value === undefined || value === null ? '' : String(value).trim();
+}
+
+function cleanNumber(value) {
+  if (value === undefined || value === null || value === '') return null;
+  return Number(value);
+}
+
+async function generateEmployeeNo(catalystApp) {
+  const table = catalystApp.datastore().table(COUNTER_TABLE);
+
+  const rows = await table.getAllRows();
+  const counterRow = rows.find(row => row.prefix === 'EMP');
+
+  if (!counterRow) {
+    throw new Error('EMP counter not initialized in Counters table');
+  }
+
+  const currentValue = Number(counterRow.value) || 0;
+  const nextValue = currentValue + 1;
+
+  await table.updateRow({
+    ROWID: counterRow.ROWID,
+    value: nextValue
+  });
+
+  return `EMP-${String(nextValue).padStart(3, '0')}`;
+}
+
 app.get('/api/employees', async (req, res) => {
   try {
     const table = getEmployeeTable(req);
 
-    let hasNext = true;
-    let nextToken = undefined;
-    const employees = [];
+    let employees = [];
+    let nextToken;
 
-    while (hasNext) {
+    do {
       const page = await table.getPagedRows({
         next_token: nextToken,
         max_rows: 200
       });
 
-      const data = page.data || [];
-      employees.push(...data);
-
-      hasNext = !!page.next_token;
+      employees.push(...(page.data || []));
       nextToken = page.next_token;
-    }
+    } while (nextToken);
 
     res.status(200).json({
       status: 'success',
@@ -84,16 +95,10 @@ app.get('/api/employees', async (req, res) => {
   }
 });
 
-/**
- * GET /api/employees/:id
- * Returns a single employee by ROWID
- */
 app.get('/api/employees/:id', async (req, res) => {
   try {
     const table = getEmployeeTable(req);
-    const rowId = req.params.id;
-
-    const employee = await table.getRow(rowId);
+    const employee = await table.getRow(req.params.id);
 
     res.status(200).json({
       status: 'success',
@@ -108,48 +113,49 @@ app.get('/api/employees/:id', async (req, res) => {
   }
 });
 
-/**
- * POST /api/employees
- * Creates a new employee
- *
- * Adjust column names below to match your Data Store table exactly.
- * Example columns:
- *  - Name
- *  - Email
- *  - Department
- *  - Designation
- *  - Salary
- */
 app.post('/api/employees', async (req, res) => {
   try {
+    const catalystApp = getCatalystApp(req);
     const table = getEmployeeTable(req);
 
     const {
       Name,
       Email,
-      Department,
-      Designation,
-      Salary
+      MobileNumber,
+      AlternateMobileNumber,
+      Gender,
+      MaritalStatus,
+      Nationality,
+      DOB,
+      BloodGroup,
+      EmergencyContactName,
+      EmergencyContactNumber,
+      Relationship
     } = req.body;
 
-    if (!Name || !Email) {
+    if (!cleanText(Name) || !cleanText(Email)) {
       return res.status(400).json({
         status: 'error',
-        message: 'Name and Email are required'
+        message: 'Employee Name and Email are required'
       });
     }
-	
-	const catalystApp = catalyst.initialize(req);
-	
-	const empNo = await generateEmployeeNo(catalystApp);
+
+    const empNo = await generateEmployeeNo(catalystApp);
 
     const rowData = {
-	  EmpNo: empNo, 
-      Name,
-      Email,
-      Department: Department || '',
-      Designation: Designation || '',
-      Salary: Salary ? Number(Salary) : null
+      EmpNo: empNo,
+      Name: cleanText(Name),
+      Email: cleanText(Email),
+      MobileNumber: cleanText(MobileNumber),
+      AlternateMobileNumber: cleanText(AlternateMobileNumber),
+      Gender: cleanText(Gender),
+      MaritalStatus: cleanText(MaritalStatus),
+      Nationality: cleanText(Nationality),
+      DOB: cleanText(DOB),
+      BloodGroup: cleanText(BloodGroup),
+      EmergencyContactName: cleanText(EmergencyContactName),
+      EmergencyContactNumber: cleanText(EmergencyContactNumber),
+      Relationship: cleanText(Relationship)
     };
 
     const insertedRow = await table.insertRow(rowData);
@@ -168,34 +174,35 @@ app.post('/api/employees', async (req, res) => {
   }
 });
 
-/**
- * PUT /api/employees/:id
- * Updates an employee by ROWID
- *
- * ROWID is mandatory for updateRow().
- */
 app.put('/api/employees/:id', async (req, res) => {
   try {
     const table = getEmployeeTable(req);
     const rowId = req.params.id;
 
-    const {
-      Name,
-      Email,
-      Department,
-      Designation,
-      Salary
-    } = req.body;
+    const allowedFields = [
+      'Name',
+      'Email',
+      'MobileNumber',
+      'AlternateMobileNumber',
+      'Gender',
+      'MaritalStatus',
+      'Nationality',
+      'DOB',
+      'BloodGroup',
+      'EmergencyContactName',
+      'EmergencyContactNumber',
+      'Relationship'
+    ];
 
     const updatedRowData = {
       ROWID: rowId
     };
 
-    if (Name !== undefined) updatedRowData.Name = Name;
-    if (Email !== undefined) updatedRowData.Email = Email;
-    if (Department !== undefined) updatedRowData.Department = Department;
-    if (Designation !== undefined) updatedRowData.Designation = Designation;
-    if (Salary !== undefined) updatedRowData.Salary = Salary === '' ? null : Number(Salary);
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updatedRowData[field] = cleanText(req.body[field]);
+      }
+    });
 
     const updatedRow = await table.updateRow(updatedRowData);
 
@@ -213,10 +220,6 @@ app.put('/api/employees/:id', async (req, res) => {
   }
 });
 
-/**
- * DELETE /api/employees/:id
- * Deletes an employee by ROWID
- */
 app.delete('/api/employees/:id', async (req, res) => {
   try {
     const table = getEmployeeTable(req);
@@ -238,34 +241,6 @@ app.delete('/api/employees/:id', async (req, res) => {
   }
 });
 
-async function generateEmployeeNo(catalystApp) {
-  const datastore = catalystApp.datastore();
-  const table = datastore.table('Counters');
-
-  // Fetch current counter
-  const rows = await table.getAllRows(); // or use ZCQL if filtering
-  const counterRow = rows.find(r => r.prefix === 'EMP');
-
-  if (!counterRow) {
-    throw new Error('EMP counter not initialized');
-  }
-
-  const currentValue = Number(counterRow.value) || 0;
-  const nextValue = currentValue + 1;
-
-  // Update counter
-  await table.updateRow({
-    ROWID: counterRow.ROWID,
-    value: nextValue
-  });
-
-  // Format EMP-001
-  const empNo = `EMP-${String(nextValue).padStart(3, '0')}`;
-
-  return empNo;
-}
-
-// Global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({
