@@ -6,8 +6,7 @@
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://kendo.cdn.telerik.com/2022.2.802/js/kendo.all.min.js"></script>
-  <link rel="stylesheet"
-        href="https://kendo.cdn.telerik.com/2022.2.802/styles/kendo.default-ocean-blue.min.css">
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.2.802/styles/kendo.default-ocean-blue.min.css">
 
   <style>
     body {
@@ -18,17 +17,14 @@
     }
 
     h2 {
-      margin-bottom: 16px;
       color: #1e3a8a;
-      font-weight: 700;
+      margin-bottom: 16px;
     }
 
     .toolbar-actions {
       display: flex;
       gap: 10px;
-      align-items: center;
       margin-bottom: 12px;
-      flex-wrap: wrap;
     }
 
     .btn-primary,
@@ -40,7 +36,6 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.2s ease;
     }
 
     .btn-primary {
@@ -48,17 +43,9 @@
       color: #fff;
     }
 
-    .btn-primary:hover {
-      background: #1d4ed8;
-    }
-
     .btn-secondary {
       background: #e5e7eb;
       color: #111827;
-    }
-
-    .btn-secondary:hover {
-      background: #d1d5db;
     }
 
     .btn-danger {
@@ -66,25 +53,11 @@
       color: #fff;
     }
 
-    .btn-danger:hover {
-      background: #dc2626;
-    }
-
     .k-grid {
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
       background: #fff;
-    }
-
-    .k-grid-header {
-      background: #eff6ff;
-      font-weight: 700;
-    }
-
-    .k-grid td,
-    .k-grid th {
-      font-size: 14px;
     }
 
     .radio-cell {
@@ -102,8 +75,11 @@
       font-weight: 700;
     }
 
-    .form-row {
-      margin-bottom: 14px;
+    .popup-form {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px 20px;
+      padding: 12px;
     }
 
     .form-row label {
@@ -113,7 +89,8 @@
       color: #374151;
     }
 
-    .form-row input {
+    .form-row input,
+    .form-row select {
       width: 100%;
       padding: 10px 12px;
       border-radius: 8px;
@@ -123,361 +100,373 @@
       background: #fff;
     }
 
-    .form-row input:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
     .form-actions {
-      margin-top: 20px;
+      grid-column: span 3;
       text-align: right;
+      margin-top: 10px;
     }
 
     .form-actions button {
       margin-left: 8px;
     }
 	
-	.popup-form {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 16px 20px;
-	padding: 10px;
+	.readonly-field {
+	background: #f1f5f9;        /* light grey */
+	color: #64748b;             /* muted text */
+	border: 1px dashed #cbd5f5; /* dashed border = non-editable cue */
+	cursor: not-allowed;
+	font-weight: 600;
 	}
-
-	.form-row {
-	margin-bottom: 0;
-	}
-
-	.form-actions {
-	grid-column: span 3; /* Full width for buttons */
-	text-align: right;
-	margin-top: 10px;
-	}
-	
-	.form-row select {
-	width: 100%;
-	padding: 10px 12px;
-	border-radius: 8px;
-	border: 1px solid #d1d5db;
-	font-size: 14px;
-	box-sizing: border-box;
-	background: #fff;
-	}
-
-	.form-row select:focus {
-	outline: none;
-	border-color: #2563eb;
-	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-	}
-	
-	
   </style>
 </head>
+
 <body>
-  <h2>Employee Master</h2>
-  <div id="grid"></div>
 
-  <!-- Add Employee Popup -->
-  <div id="employeeWindow" style="display:none;">
-    <form id="employeeForm" class="popup-form">
-      <div class="form-row">
-        <label for="addName">Employee Name</label>
-        <input id="addName" type="text" placeholder="Enter employee name" required />
-      </div>
+<h2>Employee Master</h2>
 
-      <div class="form-row">
-        <label for="addEmail">Email</label>
-        <input id="addEmail" type="email" placeholder="Enter email address" required />
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addMobNum">Mobile number</label>
-        <input id="addMobNum" type="number" min="0" placeholder="Enter mobile number" />
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addAltMobNum">Alternate mobile number</label>
-        <input id="addAltMobNum" type="number" min="0" placeholder="Enter alternate mobile number" />
-      </div>
-	  
-	  <div class="form-row">
-		<label for="addGender">Gender</label>
-		<select id="addGender">
-		<option value="">Select Gender</option>
-		<option value="Male">Male</option>
-		<option value="Female">Female</option>
-		<option value="Other">Other</option>
-		</select>
-      </div>
+<div id="grid"></div>
 
-      <div class="form-row">
-        <label for="addMaritalStatus">Marital Status</label>
-		<select id="addMaritalStatus">
-		<option value="">Select </option>
-		<option value="Married">Married</option>
-		<option value="Single">Single</option>
-		</select>
-      </div>
+<div id="employeeWindow" style="display:none;">
+  <form id="employeeForm" class="popup-form">
 
-      <div class="form-row">
-        <label for="addNatiaonlity">Nationality</label>
-		<select id="addNatiaonlity">
-		<option value="">Select </option>
-		<option value="Indian">Indian</option>
-		<option value="Other">Other</option>
-		</select>
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addDOB">Date of Birth</label>
-        <input id="addDOB" />
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addBloodGroup">Blood Group</label>
-        <input id="addBloodGroup" type="text" min="0" placeholder="Enter Blood Group" />
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addEmerContactName">Emergency Contact Name</label>
-        <input id="addEmerContactName" type="text" min="0" placeholder="Enter Emergency Contact Name" />
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addEmerContactNum">Emergency Contact Number</label>
-        <input id="addEmerContactNum" type="number" min="0" placeholder="Enter Emergency Contact Number" />
-      </div>
-	  
-	  <div class="form-row">
-        <label for="addReln">Relationship</label>
-		<select id="addReln">
-		<option value="">Select Gender</option>
-		<option value="Male">Father</option>
-		<option value="Female">Mother</option>
-		<option value="Husband">Husband</option>
-		<option value="Other">Other</option>
-		</select>
-      </div>
+    <input type="hidden" id="employeeRowId">
 
-      <div class="form-actions">
-        <button type="button" id="cancelEmployee" class="btn-secondary">Cancel</button>
-        <button type="button" id="saveEmployee" class="btn-primary">Save</button>
-      </div>
-    </form>
-  </div>
+    <div class="form-row">
+      <label>Employee No</label>
+      <input id="addEmpNo" type="text" readonly class="readonly-field">
+    </div>
 
-  <script>
-    $(document).ready(function () {
-      const baseUrl = "/api/employees";
-      let selectedRowItem = null;
+    <div class="form-row">
+      <label>Employee Name *</label>
+      <input id="addName" type="text">
+    </div>
 
-      const employeeDataSource = new kendo.data.DataSource({
-        transport: {
-          read: {
-            url: baseUrl,
-            type: "GET",
-            dataType: "json"
-          },
-          update: {
-            url: function (data) {
-              return baseUrl + "/" + data.ROWID;
-            },
-            type: "PUT",
-            dataType: "json",
-            contentType: "application/json"
-          },
-          destroy: {
-            url: function (data) {
-              return baseUrl + "/" + data.ROWID;
-            },
-            type: "DELETE",
-            dataType: "json"
-          },
-          parameterMap: function (data, type) {
-            if (type === "update") {
-              return kendo.stringify({
-                Name: data.Name,
-                Email: data.Email,
-                Department: data.Department,
-                Designation: data.Designation,
-                Salary: data.Salary
-              });
-            }
-            return data;
-          }
+    <div class="form-row">
+      <label>Email *</label>
+      <input id="addEmail" type="email">
+    </div>
+
+    <div class="form-row">
+      <label>Mobile Number</label>
+      <input id="addMobileNumber" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>Alternate Mobile Number</label>
+      <input id="addAlternateMobileNumber" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>Gender</label>
+      <select id="addGender">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Marital Status</label>
+      <select id="addMaritalStatus">
+        <option value="">Select Status</option>
+        <option value="Single">Single</option>
+        <option value="Married">Married</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Nationality</label>
+      <select id="addNationality">
+        <option value="">Select Nationality</option>
+        <option value="Indian">Indian</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Date of Birth</label>
+      <input id="addDOB">
+    </div>
+
+    <div class="form-row">
+      <label>Blood Group</label>
+      <input id="addBloodGroup" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>Emergency Contact Name</label>
+      <input id="addEmergencyContactName" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>Emergency Contact Number</label>
+      <input id="addEmergencyContactNumber" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>Relationship</label>
+      <select id="addRelationship">
+        <option value="">Select Relationship</option>
+        <option value="Father">Father</option>
+        <option value="Mother">Mother</option>
+        <option value="Husband">Husband</option>
+        <option value="Wife">Wife</option>
+        <option value="Brother">Brother</option>
+        <option value="Sister">Sister</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" id="cancelEmployee" class="btn-secondary">Cancel</button>
+      <button type="button" id="saveEmployee" class="btn-primary">Save</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+$(document).ready(function () {
+  const baseUrl = "/api/employees";
+  let selectedRowItem = null;
+  let formMode = "ADD";
+
+  $("#addDOB").kendoDatePicker({
+    format: "dd-MM-yyyy",
+    max: new Date(),
+    start: "decade",
+    depth: "month"
+  });
+
+  const employeeWindow = $("#employeeWindow").kendoWindow({
+    title: "Add Employee",
+    width: "950px",
+    modal: true,
+    visible: false,
+    resizable: false
+  }).data("kendoWindow");
+
+  const employeeDataSource = new kendo.data.DataSource({
+    transport: {
+      read: {
+        url: baseUrl,
+        type: "GET",
+        dataType: "json"
+      },
+      destroy: {
+        url: function (data) {
+          return baseUrl + "/" + data.ROWID;
         },
-        schema: {
-          data: "data",
-          model: {
-            id: "ROWID",
-            fields: {
-              ROWID: { editable: false, nullable: true },
-              EmpNo: { editable: false },
-              Name: { type: "string", validation: { required: true } },
-              Email: { type: "string", validation: { required: true } },
-              Department: { type: "string" },
-              Designation: { type: "string" },
-              Salary: { type: "number", validation: { min: 0 } }
-            }
-          }
-        },
-        pageSize: 10,
-        error: function (e) {
-          console.log("Kendo error:", e);
-          const msg =
-            e.xhr && e.xhr.responseJSON && e.xhr.responseJSON.message
-              ? e.xhr.responseJSON.message
-              : "Something went wrong";
-          alert(msg);
-        }
-      });
+        type: "DELETE",
+        dataType: "json"
+      }
+    },
+    schema: {
+      data: "data",
+      model: {
+        id: "ROWID"
+      }
+    },
+    pageSize: 10
+  });
 
-      const grid = $("#grid").kendoGrid({
-        dataSource: employeeDataSource,
-        pageable: true,
-        sortable: true,
-        filterable: true,
-        selectable: "row",
-        toolbar: `
-          <div class="toolbar-actions">
-            <button type="button" id="btnAddEmployee" class="btn-primary">+ Add Employee</button>
-            <button type="button" id="btnEditEmployee" class="btn-secondary" style="display:none;">Edit</button>
-            <button type="button" id="btnDeleteEmployee" class="btn-danger" style="display:none;">Delete</button>
-          </div>
-        `,
-        editable: "popup",
-        edit: function (e) {
-          if (e.model.isNew()) {
-            e.container.find(".k-grid-update").text("Create");
-          } else {
-            e.container.find(".k-grid-update").text("Update");
-          }
-        },
-        dataBound: function () {
-          selectedRowItem = null;
-          $("#btnEditEmployee").hide();
-          $("#btnDeleteEmployee").hide();
-          $("#grid tbody .row-selector").prop("checked", false);
-        },
-        columns: [
-          {
-            title: "",
-            width: "60px",
-            sortable: false,
-            filterable: false,
-            attributes: { class: "radio-cell" },
-            template: '<input type="radio" name="employeeSelector" class="row-selector" />'
-          },
-          { field: "EmpNo", title: "Employee No", width: "140px" },
-          { field: "Name", title: "Employee Name" },
-          { field: "Email", title: "Email" },
-          { field: "Department", title: "Department" },
-          { field: "Designation", title: "Designation" },
-          { field: "Salary", title: "Salary", format: "{0:n0}" }
-        ]
-      }).data("kendoGrid");
+  const grid = $("#grid").kendoGrid({
+    dataSource: employeeDataSource,
+    pageable: true,
+    sortable: true,
+    filterable: true,
+    scrollable: true,
+    selectable: "row",
+    toolbar: `
+      <div class="toolbar-actions">
+        <button type="button" id="btnAddEmployee" class="btn-primary">+ Add Employee</button>
+        <button type="button" id="btnEditEmployee" class="btn-secondary" style="display:none;">Edit</button>
+        <button type="button" id="btnDeleteEmployee" class="btn-danger" style="display:none;">Delete</button>
+      </div>
+    `,
+    dataBound: function () {
+      selectedRowItem = null;
+      $("#btnEditEmployee").hide();
+      $("#btnDeleteEmployee").hide();
+    },
+    columns: [
+      {
+        title: "",
+        width: "60px",
+        sortable: false,
+        filterable: false,
+        attributes: { class: "radio-cell" },
+        template: '<input type="radio" name="employeeSelector" class="row-selector" />'
+      },
+      { field: "EmpNo", title: "Employee No", width: "140px" },
+      { field: "Name", title: "Employee Name", width: "180px" },
+      { field: "Email", title: "Email", width: "220px" },
+      { field: "MobileNumber", title: "Mobile Number", width: "160px" },
+      { field: "AlternateMobileNumber", title: "Alternate Mobile", width: "170px" },
+      { field: "Gender", title: "Gender", width: "120px" },
+      { field: "MaritalStatus", title: "Marital Status", width: "150px" },
+      { field: "Nationality", title: "Nationality", width: "140px" },
+      { field: "DOB", title: "Date of Birth", width: "140px" },
+      { field: "BloodGroup", title: "Blood Group", width: "130px" },
+      { field: "EmergencyContactName", title: "Emergency Contact Name", width: "220px" },
+      { field: "EmergencyContactNumber", title: "Emergency Contact Number", width: "220px" },
+      { field: "Relationship", title: "Relationship", width: "150px" }
+    ]
+  }).data("kendoGrid");
 
-      const employeeWindow = $("#employeeWindow").kendoWindow({
-        title: "Add Employee",
-        width: "800px",
-        modal: true,
-        visible: false,
-        resizable: false
-      }).data("kendoWindow");
+  function resetForm() {
+    $("#employeeForm")[0].reset();
+    $("#employeeRowId").val("");
+    $("#addEmpNo").val("");
 
-      $("#grid").on("change", ".row-selector", function () {
-        const tr = $(this).closest("tr");
+    const dobPicker = $("#addDOB").data("kendoDatePicker");
+    if (dobPicker) dobPicker.value(null);
+  }
 
-        $("#grid tbody .row-selector").not(this).prop("checked", false);
+  function fillForm(data) {
+    $("#employeeRowId").val(data.ROWID || "");
+    $("#addEmpNo").val(data.EmpNo || "");
+    $("#addName").val(data.Name || "");
+    $("#addEmail").val(data.Email || "");
+    $("#addMobileNumber").val(data.MobileNumber || "");
+    $("#addAlternateMobileNumber").val(data.AlternateMobileNumber || "");
+    $("#addGender").val(data.Gender || "");
+    $("#addMaritalStatus").val(data.MaritalStatus || "");
+    $("#addNationality").val(data.Nationality || "");
+    $("#addBloodGroup").val(data.BloodGroup || "");
+    $("#addEmergencyContactName").val(data.EmergencyContactName || "");
+    $("#addEmergencyContactNumber").val(data.EmergencyContactNumber || "");
+    $("#addRelationship").val(data.Relationship || "");
 
-        grid.clearSelection();
-        grid.select(tr);
+    const dobPicker = $("#addDOB").data("kendoDatePicker");
+    if (dobPicker) {
+      if (data.DOB) {
+        dobPicker.value(kendo.parseDate(data.DOB, "yyyy-MM-dd"));
+      } else {
+        dobPicker.value(null);
+      }
+    }
+  }
 
-        selectedRowItem = grid.dataItem(tr);
+  function getPayload() {
+    const dobPicker = $("#addDOB").data("kendoDatePicker");
 
-        $("#btnEditEmployee").show();
-        $("#btnDeleteEmployee").show();
-      });
+    return {
+      Name: $("#addName").val().trim(),
+      Email: $("#addEmail").val().trim(),
+      MobileNumber: $("#addMobileNumber").val().trim(),
+      AlternateMobileNumber: $("#addAlternateMobileNumber").val().trim(),
+      Gender: $("#addGender").val(),
+      MaritalStatus: $("#addMaritalStatus").val(),
+      Nationality: $("#addNationality").val(),
+      DOB: dobPicker && dobPicker.value()
+        ? kendo.toString(dobPicker.value(), "yyyy-MM-dd")
+        : "",
+      BloodGroup: $("#addBloodGroup").val().trim(),
+      EmergencyContactName: $("#addEmergencyContactName").val().trim(),
+      EmergencyContactNumber: $("#addEmergencyContactNumber").val().trim(),
+      Relationship: $("#addRelationship").val()
+    };
+  }
 
-      $(document).on("click", "#btnAddEmployee", function () {
-        $("#employeeForm")[0].reset();
-        employeeWindow.title("Add Employee");
-        employeeWindow.center().open();
-      });
-	  
-		$("#addDOB").kendoDatePicker({
-		format: "dd-MM-yyyy",
-		max: new Date(),          // Prevent future dates
-		start: "decade",          // Opens in year selection view
-		depth: "month"            // User selects date finally
-		});
+  $(document).on("click", "#btnAddEmployee", function () {
+    formMode = "ADD";
+    resetForm();
 
-      $("#saveEmployee").on("click", function () {
-        const payload = {
-          Name: $("#addName").val().trim(),
-          Email: $("#addEmail").val().trim(),
-          Department: $("#addDepartment").val().trim(),
-          Designation: $("#addDesignation").val().trim(),
-          Salary: $("#addSalary").val() ? Number($("#addSalary").val()) : null
-        };
+    employeeWindow.title("Add Employee");
+    employeeWindow.center().open();
+  });
 
-        if (!payload.Name || !payload.Email) {
-          alert("Name and Email are required");
-          return;
-        }
+  $(document).on("click", "#btnEditEmployee", function () {
+    if (!selectedRowItem) {
+      alert("Please select a row.");
+      return;
+    }
 
-        $.ajax({
-          url: baseUrl,
-          type: "POST",
-          contentType: "application/json",
-          dataType: "json",
-          data: JSON.stringify(payload),
-          success: function () {
-            employeeWindow.close();
-            employeeDataSource.read();
-          },
-          error: function (xhr) {
-            const msg =
-              xhr.responseJSON && xhr.responseJSON.message
-                ? xhr.responseJSON.message
-                : "Something went wrong";
-            alert(msg);
-          }
-        });
-      });
+    formMode = "EDIT";
+    resetForm();
+    fillForm(selectedRowItem);
 
-      $("#cancelEmployee").on("click", function () {
+    employeeWindow.title("Edit Employee");
+    employeeWindow.center().open();
+  });
+
+  $("#saveEmployee").on("click", function () {
+    const payload = getPayload();
+
+    if (!payload.Name || !payload.Email) {
+      alert("Employee Name and Email are required");
+      return;
+    }
+
+    let ajaxUrl = baseUrl;
+    let ajaxType = "POST";
+
+    if (formMode === "EDIT") {
+      const rowId = $("#employeeRowId").val();
+
+      if (!rowId) {
+        alert("ROWID missing. Please select employee again.");
+        return;
+      }
+
+      ajaxUrl = baseUrl + "/" + rowId;
+      ajaxType = "PUT";
+    }
+
+    $.ajax({
+      url: ajaxUrl,
+      type: ajaxType,
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify(payload),
+      success: function () {
         employeeWindow.close();
-      });
-
-      $(document).on("click", "#btnEditEmployee", function () {
-        if (!selectedRowItem) {
-          alert("Please select a row.");
-          return;
-        }
-
-        const tr = $("#grid tbody tr[data-uid='" + selectedRowItem.uid + "']");
-        grid.editRow(tr);
-      });
-
-      $(document).on("click", "#btnDeleteEmployee", function () {
-        if (!selectedRowItem) {
-          alert("Please select a row.");
-          return;
-        }
-
-        if (confirm("Are you sure you want to delete this employee?")) {
-          employeeDataSource.remove(selectedRowItem);
-          employeeDataSource.sync();
-          selectedRowItem = null;
-          $("#btnEditEmployee").hide();
-          $("#btnDeleteEmployee").hide();
-        }
-      });
-
-      employeeDataSource.read();
+        employeeDataSource.read();
+      },
+      error: function (xhr) {
+        const msg = xhr.responseJSON && xhr.responseJSON.message
+          ? xhr.responseJSON.message
+          : "Something went wrong";
+        alert(msg);
+      }
     });
-  </script>
+  });
+
+  $("#cancelEmployee").on("click", function () {
+    employeeWindow.close();
+  });
+
+  $("#grid").on("change", ".row-selector", function () {
+    const tr = $(this).closest("tr");
+
+    $("#grid tbody .row-selector").not(this).prop("checked", false);
+
+    grid.clearSelection();
+    grid.select(tr);
+
+    selectedRowItem = grid.dataItem(tr);
+
+    $("#btnEditEmployee").show();
+    $("#btnDeleteEmployee").show();
+  });
+
+  $(document).on("click", "#btnDeleteEmployee", function () {
+    if (!selectedRowItem) {
+      alert("Please select a row.");
+      return;
+    }
+
+    if (confirm("Are you sure you want to delete this employee?")) {
+      employeeDataSource.remove(selectedRowItem);
+      employeeDataSource.sync();
+    }
+  });
+
+  employeeDataSource.read();
+});
+</script>
+
 </body>
 </html>
